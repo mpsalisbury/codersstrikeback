@@ -31,7 +31,7 @@ func TestAbs(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			got, want := math.Abs(test.arg), test.want
 			if got != want {
-				t.Errorf("Abs(-1.0) = %0.1f; want %f", got, want)
+				t.Errorf("Abs(%0.1f) = %0.1f; want %0.1f", test.arg, got, want)
 			}
 		})
 	}
