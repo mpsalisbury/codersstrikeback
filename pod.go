@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"math"
+	"os"
 )
 
 // ****************************************************** Point
@@ -23,8 +25,8 @@ func (p *Point) String() string {
 	return fmt.Sprintf("%d %d", int(p.x), int(p.y))
 }
 
-func (p *Point) ReadInput() {
-	fmt.Scan(&p.x, &p.y)
+func (p *Point) ReadInput(in io.Reader) {
+	fmt.Fscan(in, &p.x, &p.y)
 }
 
 // ****************************************************** Vector
@@ -62,8 +64,8 @@ func (v *Vector) len2() float64 {
 	return v.dot(v)
 }
 
-func (v *Vector) ReadInput() {
-	fmt.Scan(&v.vx, &v.vy)
+func (v *Vector) ReadInput(in io.Reader) {
+	fmt.Fscan(in, &v.vx, &v.vy)
 }
 
 // ****************************************************** Action
@@ -175,11 +177,11 @@ func (p1 *Pod) willCollideWith(p2 *Pod) bool {
 	return p1.nextPos().minus(p2.nextPos()).len() < 800
 }
 
-func (p *Pod) ReadUpdateInput() {
-	p.pos.ReadInput()
-	p.vel.ReadInput()
+func (p *Pod) ReadUpdateInput(in io.Reader) {
+	p.pos.ReadInput(in)
+	p.vel.ReadInput(in)
 	oldCheckpointId := p.nextCheckpointId
-	fmt.Scan(&p.angle, &p.nextCheckpointId)
+	fmt.Fscan(in, &p.angle, &p.nextCheckpointId)
 	if oldCheckpointId == 0 && p.nextCheckpointId == 1 {
 		p.curLapNum++
 	}
@@ -398,29 +400,28 @@ type Game struct {
 	numLaps int
 }
 
-func (g *Game) Init() {
-	g.ReadSetupInput()
+func (g *Game) Init(in io.Reader) {
+	g.ReadSetupInput(in)
 	g.myPod[0].init(g, &FlyStrategy{})
 	g.myPod[1].init(g, &BlockStrategy{})
-	//g.myPod[1].init(g, &LegacyStrategy{dontBoostBeforeLapNum: 1})
 }
 
-func (g *Game) ReadSetupInput() {
+func (g *Game) ReadSetupInput(in io.Reader) {
 	fmt.Scan(&g.numLaps)
 	var numCheckpoints int
 	fmt.Scan(&numCheckpoints)
 	for i := 0; i < numCheckpoints; i++ {
 		var checkpoint Point
-		checkpoint.ReadInput()
+		checkpoint.ReadInput(in)
 		g.checkpoint = append(g.checkpoint, checkpoint)
 	}
 }
 
-func (g *Game) ReadPodUpdateInput() {
-	g.myPod[0].ReadUpdateInput()
-	g.myPod[1].ReadUpdateInput()
-	g.oppPod[0].ReadUpdateInput()
-	g.oppPod[1].ReadUpdateInput()
+func (g *Game) ReadPodUpdateInput(in io.Reader) {
+	g.myPod[0].ReadUpdateInput(in)
+	g.myPod[1].ReadUpdateInput(in)
+	g.oppPod[0].ReadUpdateInput(in)
+	g.oppPod[1].ReadUpdateInput(in)
 }
 
 func (g *Game) PrintPodActionOutput() {
@@ -432,9 +433,10 @@ func (g *Game) PrintPodActionOutput() {
 
 func main() {
 	var g Game
-	g.Init()
+	in := os.Stdin
+	g.Init(in)
 	for {
-		g.ReadPodUpdateInput()
+		g.ReadPodUpdateInput(in)
 		g.PrintPodActionOutput()
 	}
 }
