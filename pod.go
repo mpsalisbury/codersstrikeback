@@ -64,6 +64,10 @@ func (v *Vector) len2() float64 {
 	return v.dot(v)
 }
 
+func (v *Vector) String() string {
+	return fmt.Sprintf("%d %d", int(v.vx), int(v.vy))
+}
+
 func (v *Vector) ReadInput(in io.Reader) {
 	fmt.Fscan(in, &v.vx, &v.vy)
 }
